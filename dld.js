@@ -16,15 +16,21 @@ var dld = function(uri, output_path, chunk_size) {
   };    
 
   var _getChunk = function (uri, from, size, cb) {
-    request({
-      uri: uri,
-      headers: {
-        'Range': 'bytes=' + from + '-' + parseInt(from + size - 1)
-      },
-      encoding: null
-    }, function (err, res, body) {
-      cb(body);
-    });
+    get();
+    function get() {
+      request({
+        uri: uri,
+        headers: {
+          'Range': 'bytes=' + from + '-' + parseInt(from + size - 1)
+        },
+        encoding: null
+      }, function (err, res, body) {
+        if (err || !res || res.statusCode !== 206) {
+          return get();
+        }
+        cb(body);
+      });
+    }
   };
 
   var _getPosition = function (filename, cb) {
